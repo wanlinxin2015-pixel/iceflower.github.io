@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛擎 SERES ENGINE | 概念演示</title>
+    <style>
+        /* --- 核心基础样式 --- */
+        :root {
+            --primary-blue: #007BFF;
+            --neon-cyan: #00f2ff;
+            --deep-bg: #0a0a12;
+            --text-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--deep-bg);
+            color: var(--text-white);
+            overflow: hidden; /* 禁止滚动，使用翻页 */
+        }
+
+        /* 背景网格动画 */
+        .bg-grid {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(0, 123, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 123, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        }
+
+        /* --- 幻灯片容器 --- */
+        .slider-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* --- 导航按钮 --- */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--primary-blue);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1.5rem;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .nav-btn:hover { background: var(--primary-blue); box-shadow: 0 0 15px var(--primary-blue); }
+        .prev-btn { left: 20px; }
+        .next-btn { right: 20px; }
+
+        /* --- 底部页码 --- */
+        .indicators {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .dot.active { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); transform: scale(1.2); }
+
+        /* --- 第一页：封面 --- */
+        .title-box h1 {
+            font-size: 5rem;
+            margin: 0;
+            background: linear-gradient(to right, #fff, var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+        .title-box p {
+            font-size: 1.5rem;
+            letter-spacing: 10px;
+            color: var(--primary-blue);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* --- 第二页：内涵释义 --- */
+        .meaning-container {
+            display: flex;
+            gap: 50px;
+            max-width: 1200px;
+            width: 80%;
+        }
+        .card {
+            flex: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s;
+        }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary-blue); }
+        .card h2 { font-size: 2.5rem; color: var(--neon-cyan); margin-bottom: 20px; }
+        .card h3 { font-size: 1.2rem; color: #aaa; margin-bottom: 15px; text-transform: uppercase; }
+        .card p { line-height: 1.8; color: #ddd; font-size: 1.1rem; }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 5px; height: 100%;
+            background: var(--primary-blue);
+        }
+
+        /* --- 第三页：机器人与汽车动画 --- */
+        .scene-container {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            border-bottom: 2px solid var(--primary-blue);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        /* 汽车轮廓 */
+        .car-shape {
+            width: 300px;
+            height: 100px;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 60px 120px 20px 20px;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            background: linear-gradient(180deg, transparent, rgba(0, 242, 255, 0.1));
+            z-index: 2;
+        }
+        /* 车轮 */
+        .wheel {
+            width: 50px;
+            height: 50px;
+            border: 2px dashed var(--primary-blue);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -25px;
+            animation: spin 4s linear infinite;
+            background: #000;
+        }
+        .w-left { left: 40px; }
+        .w-right { right: 40px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* 机械臂 (AI Robot) */
+        .robot-arm {
+            position: absolute;
+            right: -50px;
+            top: 50px;
+            width: 200px;
+            height: 20px;
+            background: #333;
+            border: 1px solid #555;
+            transform-origin: right center;
+            animation: armMove 3s ease-in-out infinite alternate;
+        }
+        .robot-joint {
+            position: absolute;
+            left: -20px;
+            top: -15px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+        .laser-beam {
+            position: absolute;
+            left: 25px;
+            top: 50px;
+            width: 2px;
+            height: 0;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px #fff;
+            animation: scan 3s ease-in-out infinite alternate;
+            opacity: 0.8;
+        }
+
+        @keyframes armMove {
+            0% { transform: rotate(-10deg) translateX(0); }
+            100% { transform: rotate(5deg) translateX(-20px); }
+        }
+        @keyframes scan {
+            0% { height: 0; opacity: 0;}
+            50% { height: 150px; opacity: 1;}
+            100% { height: 150px; opacity: 0.5;}
+        }
+
+        /* 数据流粒子 */
+        .data-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            animation: flow 1s linear infinite;
+        }
+        @keyframes flow {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100px); opacity: 0; }
+        }
+
+        .ai-status {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: monospace;
+            color: var(--neon-cyan);
+            background: rgba(0,0,0,0.6);
+            padding: 5px 10px;
+            border: 1px solid var(--primary-blue);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+
+    <!-- 导航按钮 -->
+    <button class="nav-btn prev-btn" onclick="changeSlide(-1)">&#10094;</button>
+    <button class="nav-btn next-btn" onclick="changeSlide(1)">&#10095;</button>
+
+    <div class="slider-container">
+        
+        <!-- 第一页：封面 -->
+        <section class="slide active">
+            <div class="title-box">
+                <h1>赛擎 AI</h1>
+                <p>SERES ENGINE</p>
+                <div style="margin-top: 50px; font-size: 1rem; color: #888;">CLICK ARROWS TO EXPLORE</div>
+            </div>
+        </section>
+
+        <!-- 第二页：内涵释义 -->
+        <section class="slide">
+            <h1 style="margin-bottom: 50px; color: white;">IDENTITY DECODE</h1>
+            <div class="meaning-container">
+                <div class="card">
+                    <h2>赛擎</h2>
+                    <h3>Chinese Meaning</h3>
+                    <p><strong>[赛] Seres:</strong> 传承品牌基因，代表高端与速度。<br><br>
+                    <strong>[擎] Engine/Support:</strong> 寓意"引擎"与"擎天"。它是驱动企业数字化转型的核心动力，也是支撑海量数据与模型的坚实底座。</p>
+                </div>
+                <div class="card">
+                    <h2>ENGINE</h2>
+                    <h3>English Meaning</h3>
+                    <p><strong>Core Power:</strong> Just as an engine is the heart of a vehicle, this AI is the heart of Seres' intelligence.<br><br>
+                    <strong>Processing:</strong> Represents the raw computing power and algorithmic capability driving manufacturing and R&D.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 第三页：机器人/汽车演示 -->
+        <section class="slide">
+            <h1 style="margin-bottom: 60px;">INTELLIGENT MANUFACTURING</h1>
+            <div class="scene-container">
+                
+                <!-- 状态栏 -->
+                <div class="ai-status">
+                    Target: EV-Model-X <br>
+                    AI Optimization: 99.8% <br>
+                    Status: BUILDING...
+                </div>
+
+                <!-- 汽车模型 -->
+                <div class="car-shape">
+                    <div class="wheel w-left"></div>
+                    <div class="wheel w-right"></div>
+                </div>
+
+                <!-- 机械臂 -->
+                <div class="robot-arm">
+                    <div class="robot-joint">
+                        <!-- 激光束 -->
+                        <div class="laser-beam"></div>
+                    </div>
+                </div>
+
+                <!-- 装饰性数据点 -->
+                <div class="data-particle" style="left: 300px; top: 100px; animation-delay: 0.2s;"></div>
+                <div class="data-particle" style="left: 400px; top: 120px; animation-delay: 0.5s;"></div>
+                <div class="data-particle" style="left: 350px; top: 90px; animation-delay: 0.8s;"></div>
+            </div>
+            <p style="margin-top: 30px; color: #aaa;">AI DRIVEN ASSEMBLY & OPTIMIZATION</p>
+        </section>
+
+    </div>
+
+    <!-- 底部指示点 -->
+    <div class="indicators">
+        <div class="dot active" onclick="goToSlide(0)"></div>
+        <div class="dot" onclick="goToSlide(1)"></div>
+        <div class="dot" onclick="goToSlide(2)"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            // 循环逻辑
+            if (n >= slides.length) currentSlide = 0;
+            else if (n < 0) currentSlide = slides.length - 1;
+            else currentSlide = n;
+
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function changeSlide(n) {
+            showSlide(currentSlide + n);
+        }
+
+        function goToSlide(n) {
+            showSlide(n);
+        }
+
+        // 键盘左右键控制
+        document.addEventListener('keydown', function(e) {
+            if(e.key === "ArrowRight") changeSlide(1);
+            if(e.key === "ArrowLeft") changeSlide(-1);
+        });
+    </script>
+</body>
+</html>
