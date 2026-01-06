@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sera (赛娃) - Seres AI 品牌战略演示</title>
+    <style>
+        /* --- 全局与背景 --- */
+        :root {
+            --bg-dark: #05080f;
+            --tech-blue: #00f2ff;
+            --tech-gold: #ffd700;
+            --tech-purple: #bc13fe;
+            --text-gray: #c0c6d0;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            overflow: hidden;
+        }
+
+        /* 背景：深邃的粒子网格 */
+        .background-fx {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 60%),
+                linear-gradient(0deg, rgba(0,0,0,0.8), transparent 50%, rgba(0,0,0,0.8));
+            z-index: 0;
+        }
+
+        /* --- 幻灯片容器 --- */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* --- 视觉区域 (上部) --- */
+        .visual-stage {
+            flex: 2;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        /* 图片样式 (用于后3页) */
+        .visual-stage img {
+            max-width: 90%;
+            max-height: 55vh; /* 保持适中大小 */
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.15);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            animation: hoverFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes hoverFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* --- CSS 绘制的概念图形 (用于前3页) --- */
+        .concept-art {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 1. 核心芯片动效 */
+        .core-chip {
+            width: 180px;
+            height: 180px;
+            border: 2px solid var(--tech-blue);
+            background: rgba(0, 242, 255, 0.1);
+            position: relative;
+            box-shadow: 0 0 50px var(--tech-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--tech-blue);
+            animation: spinBorder 10s linear infinite;
+        }
+        .core-chip::before, .core-chip::after {
+            content: ''; position: absolute; border: 2px solid var(--tech-blue);
+        }
+        .core-chip::before { width: 200px; height: 200px; opacity: 0.5; animation: spinReverse 15s linear infinite; }
+        .core-chip::after { width: 240px; height: 240px; border-radius: 50%; opacity: 0.3; }
+
+        /* 2. 字母徽章 S */
+        .letter-logo {
+            font-size: 10rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, var(--tech-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px var(--tech-blue));
+        }
+
+        /* 3. 中文徽章 赛 */
+        .chinese-logo {
+            font-size: 10rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, var(--tech-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px var(--tech-gold));
+        }
+
+        @keyframes spinBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spinReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+
+
+        /* --- 文字区域 (下部) --- */
+        .text-stage {
+            flex: 1.2;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            padding: 0 30px;
+            z-index: 10;
+        }
+
+        .label {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--tech-blue);
+            border: 1px solid var(--tech-blue);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0 0 20px 0;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, #aab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            color: var(--tech-blue);
+            font-weight: bold;
+        }
+
+        /* --- 导航控制 --- */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--tech-blue);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .nav-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 25px;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        .nav-btn:hover { background: white; color: black; }
+        
+        .prev-btn { right: auto; left: 40px; }
+
+    </style>
+</head>
+<body>
+
+<div class="background-fx"></div>
+
+<div class="slider-container">
+
+    <!-- PAGE 1: 战略核心 (无图，使用 CSS 芯片动画) -->
+    <div class="slide active">
+        <div class="visual-stage">
+            <div class="concept-art">
+                <div class="core-chip">AI CORE</div>
+            </div>
+        </div>
+        <div class="text-stage">
+            <div class="label">STRATEGIC VISION</div>
+            <h1>抢占战略先机 · 铸就技术灵魂</h1>
+            <p>
+                赛力斯企业 AI 承载着整合<span class="highlight">技术、数据、模型、算力</span>资源的重任。
+                这不仅是一个产品的命名，更是我们抢占人工智能战略制高点、提升品牌全球影响力的关键一步。
+            </p>
+        </div>
+    </div>
+
+    <!-- PAGE 2: Sarah 英文名解析 (无图，使用 CSS 字母 S) -->
+    <div class="slide">
+        <div class="visual-stage">
+            <div class="concept-art">
+                <div class="letter-logo">S</div>
+            </div>
+        </div>
+        <div class="text-stage">
+            <div class="label">IDENTITY: SARAH</div>
+            <h1>Sarah: 智慧与高贵的象征</h1>
+            <p>
+                <strong>Sarah</strong>，在希伯来语中寓意“公主”或“高贵”。
+                在赛力斯，她代表了技术实力的拟人化彰显。她优雅、睿智，是我们将复杂的底层代码转化为用户身边最可靠、最尊贵的智能伴侣的决心。
+            </p>
+        </div>
+    </div>
+
+    <!-- PAGE 3: 赛娃中文名解析 (无图，使用 CSS 汉字 赛) -->
+    <div class="slide">
+        <div class="visual-stage">
+            <div class="concept-art">
+                <div class="chinese-logo">赛</div>
+            </div>
+        </div>
+        <div class="text-stage">
+            <div class="label">IDENTITY: SAIWA</div>
+            <h1>赛娃：传承基因 · 亲和共生</h1>
+            <p>
+                <strong>“赛”</strong> 传承自赛力斯 (Seres)，象征着在 AI 赛道上的竞逐与超越；
+                <strong>“娃”</strong> 赋予了科技以生命和温度。
+                她不是冷冰冰的机器，而是陪伴用户成长、懂你所想的“赛力斯之子”。
+            </p>
+        </div>
+    </div>
+
+    <!-- PAGE 4: 赋能 (用户图一) -->
+    <div class="slide">
+        <div class="visual-stage">
+            <!-- 请替换图片 src -->
+            <img src="sarah_1.jpg" alt="Sarah赋能">
+        </div>
+        <div class="text-stage">
+            <div class="label">PHASE 01: EMPOWERMENT</div>
+            <h1>技术落地 · 深度赋能</h1>
+            <p>
+                在这里，Sarah 将海量的数据与先进模型转化为驱动汽车的神经脉冲。
+                她正在为赛力斯的硬件躯体注入“灵魂”，实现从“制造”到“智造”的跨越。
+            </p>
+        </div>
+    </div>
+
+    <!-- PAGE 5: 出海 (用户图二) -->
+    <div class="slide">
+        <div class="visual-stage">
+            <!-- 请替换图片 src -->
+            <img src="sarah_2.jpg" alt="走向国际">
+        </div>
+        <div class="text-stage">
+            <div class="label">PHASE 02: GLOBALIZATION</div>
+            <h1>中东启航 · 智驾全球</h1>
+            <p>
+                在 Sarah 的助力下，Seres 跨越国界。背景中的中东地标见证了中国智造的崛起。
+                无论语言如何变化，Sarah 提供的安全感与智能体验始终如一。
+            </p>
+        </div>
+    </div>
+
+    <!-- PAGE 6: 决战 (用户图三) -->
+    <div class="slide">
+        <div class="visual-stage">
+            <!-- 请替换图片 src -->
+            <img src="sarah_3.jpg" alt="巅峰对决">
+        </div>
+        <div class="text-stage">
+            <div class="label">PHASE 03: THE SUMMIT</div>
+            <h1>巅峰对决 · 王者归来</h1>
+            <p>
+                在垂直领域的山巅，Sarah 展现出超越通用 AI (如 OpenAI/Google) 的专业实力。
+                专注造就卓越，在智能出行领域，Sarah 就是那个战无不胜的最终赢家。
+            </p>
+        </div>
+    </div>
+
+    <button class="nav-btn prev-btn" onclick="move(-1)">&#8592;</button>
+    <button class="nav-btn" onclick="move(1)">NEXT &#8594;</button>
+    <div class="progress-bar" id="progress"></div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progress');
+
+    function updateView() {
+        // 更新幻灯片
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === currentSlide) slide.classList.add('active');
+        });
+
+        // 更新进度条
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+    }
+
+    function move(dir) {
+        currentSlide += dir;
+        
+        // 循环逻辑
+        if (currentSlide >= slides.length) currentSlide = 0;
+        if (currentSlide < 0) currentSlide = slides.length - 1;
+
+        updateView();
+    }
+
+    // 初始化进度条
+    updateView();
+
+    // 键盘支持
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight') move(1);
+        if(e.key === 'ArrowLeft') move(-1);
+    });
+</script>
+
+</body>
+</html>
